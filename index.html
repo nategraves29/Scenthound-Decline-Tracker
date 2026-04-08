@@ -70,6 +70,53 @@
         body.dark-mode .data-table td { border-bottom-color: #333; }
         body.dark-mode .data-table tbody tr:hover { background: #2f3b47; }
         body.dark-mode .tag { background: #1b455f; color: #73c8ff; }
+
+        /* ── Mobile Optimizations ── */
+        @media (max-width: 640px) {
+            .container { padding: 12px; }
+
+            /* Header: give title room so toggle doesn't overlap */
+            .header { padding: 16px 12px 20px; }
+            h1 { font-size: 1.45em; padding-top: 38px; letter-spacing: 0.5px; }
+            .subtitle { font-size: 0.88em; }
+            .theme-toggle { top: 12px; right: 12px; font-size: 0.78em; padding: 5px 10px; }
+
+            /* Sync reminder */
+            .sync-reminder { font-size: 0.85em; padding: 10px; }
+
+            /* Buttons */
+            .btn { font-size: 0.9em; padding: 10px 16px; }
+            .btn-small { padding: 8px 12px; font-size: 0.82em; }
+
+            /* Form */
+            .form-box { padding: 18px 14px; }
+            .form-grid { grid-template-columns: 1fr !important; gap: 14px; }
+
+            /* Checkbox grid — single column on mobile */
+            .checkbox-grid { grid-template-columns: 1fr !important; gap: 10px; }
+
+            /* Chart */
+            .chart-container { height: auto !important; min-height: 320px; padding: 14px; }
+            .chart-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+            .chart-controls select { width: 100% !important; }
+
+            /* Date range: stack the inputs vertically */
+            .date-range-row { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; }
+            .date-range-row input { width: 100% !important; }
+            .date-range-row span { display: none; }
+
+            /* Table header: stack search + export button */
+            .table-header-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+            .table-header-bar h3 { margin-bottom: 4px !important; }
+            .table-header-bar > div { flex-direction: column !important; gap: 8px !important; }
+
+            /* Search input & export button — full width */
+            .search-input-mobile { width: 100% !important; box-sizing: border-box; }
+            .export-btn-mobile { width: 100%; text-align: center; }
+
+            /* Notification select — full width */
+            .notification-select { max-width: 100% !important; width: 100% !important; }
+        }
     </style>
 </head>
 <body>
@@ -428,7 +475,7 @@
 
                             <div style={{ marginTop: '20px' }}>
                                 <label className="form-label">How was the Pet Parent notified?</label>
-                                <select className="form-select" style={{ maxWidth: '300px' }} value={notificationMethod} onChange={(e) => setNotificationMethod(e.target.value)}>
+                                <select className="form-select notification-select" style={{ maxWidth: '300px' }} value={notificationMethod} onChange={(e) => setNotificationMethod(e.target.value)}>
                                     {contactMethods.map(method => <option key={method} value={method}>{method}</option>)}
                                 </select>
                             </div>
@@ -459,7 +506,7 @@
                                                     {uniqueManagers.map(mgr => <option key={mgr} value={mgr}>{mgr}</option>)}
                                                 </select>
                                                 
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                <div className="date-range-row" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                                     <input type="date" className="form-input" style={{ padding: '6px', width: 'auto' }} value={startDate} onChange={(e) => setStartDate(e.target.value)} title="Start Date" />
                                                     <span>to</span>
                                                     <input type="date" className="form-input" style={{ padding: '6px', width: 'auto' }} value={endDate} onChange={(e) => setEndDate(e.target.value)} title="End Date" />
@@ -486,13 +533,13 @@
                                     <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                                         <input 
                                             type="text" 
-                                            className="form-input" 
+                                            className="form-input search-input-mobile" 
                                             placeholder="Search Dog, Manager, Reason..." 
                                             style={{ padding: '6px 12px', width: '250px' }}
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
-                                        <button className="btn btn-outline btn-small" onClick={handleCSVExport}>📥 Export Filtered CSV</button>
+                                        <button className="btn btn-outline btn-small export-btn-mobile" onClick={handleCSVExport}>📥 Export Filtered CSV</button>
                                     </div>
                                 </div>
                                 <div style={{ overflowX: 'auto' }}>
