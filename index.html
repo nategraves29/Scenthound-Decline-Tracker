@@ -10,168 +10,41 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 100%;
-            margin: 0;
-            padding: 0;
-            background: #f8f8f8;
-        }
-
-        .container {
-            background: white;
-            padding: 20px;
-            max-width: 100%;
-            margin: 0;
-            min-height: 100vh;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
+        body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f8f8f8; }
+        .container { background: white; padding: 20px; max-width: 100%; margin: 0; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; text-align: center; }
         h1 { margin: 0; font-size: 2.2em; font-weight: 700; letter-spacing: 1px; }
         .subtitle { font-size: 1.1em; opacity: 0.9; font-weight: 400; margin-top: 5px; }
 
-        .btn {
-            background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            font-size: 1em;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-family: 'Poppins', sans-serif;
-        }
+        .btn { background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%); color: white; padding: 10px 20px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 160, 220, 0.3); }
+        .btn-danger { background: #E74C3C; }
+        .btn-danger:hover { box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); }
+        .btn-small { padding: 6px 12px; font-size: 0.85em; margin-right: 5px; }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 160, 220, 0.3);
-        }
-
-        .form-box {
-            background: #f0f9ff;
-            border-left: 5px solid #00A0DC;
-            padding: 30px;
-            margin: 20px 0;
-            border-radius: 8px;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 600;
-            color: #0077B6;
-            margin-bottom: 8px;
-            font-size: 0.95em;
-        }
-
-        .form-input, .form-select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1em;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: #00A0DC;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            font-size: 0.9em;
-            cursor: pointer;
-        }
-
+        .form-box { background: #f0f9ff; border-left: 5px solid #00A0DC; padding: 30px; margin: 20px 0; border-radius: 8px; }
+        .form-label { display: block; font-weight: 600; color: #0077B6; margin-bottom: 8px; font-size: 0.95em; }
+        .form-input, .form-select { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 1em; box-sizing: border-box; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: #00A0DC; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 10px; }
+        .checkbox-label { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9em; cursor: pointer; }
         .checkbox-label input { margin-top: 4px; }
 
-        /* Updated Dashboard Layout */
-        .dashboard-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            margin-top: 30px;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-            height: 350px;
-            width: 100%;
-            max-width: 500px; /* Keeps the pie chart from getting comically large */
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .table-container {
-            width: 100%;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-            overflow: hidden;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table thead {
-            background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%);
-            color: white;
-        }
-
-        .data-table th, .data-table td {
-            padding: 15px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
+        .dashboard-layout { display: flex; flex-direction: column; gap: 40px; margin-top: 30px; }
+        
+        .chart-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee; height: 400px; width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; }
+        .chart-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        
+        .table-container { width: 100%; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee; overflow: hidden; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table thead { background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%); color: white; }
+        .data-table th, .data-table td { padding: 15px 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
         .data-table tbody tr:hover { background: #f0f9ff; }
-
-        .tag {
-            display: inline-block;
-            background: #e6f7ff;
-            color: #0077B6;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            margin: 2px;
-            font-weight: 600;
-        }
+        
+        .tag { display: inline-block; background: #e6f7ff; color: #0077B6; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; margin: 2px; font-weight: 600; }
+        .action-cell { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -179,7 +52,7 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-      import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
       
       const firebaseConfig = {
         apiKey: "AIzaSyCAMx7jOeO8zNqWbS1cRLMzoDgnvqZOoC4",
@@ -187,18 +60,20 @@
         projectId: "scenthound-decline-tracker",
         storageBucket: "scenthound-decline-tracker.firebasestorage.app",
         messagingSenderId: "850434594459",
-        appId: "1:850434594459:web:9e60eca5285d356196d83e"
+        appId: "1:850434594459:web:9e60eca5285d356196d83e",
+        measurementId: "G-99ED6B0BPP"
       };
       
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
-      
-      // Initialize Firestore and expose it to React
       const db = getFirestore(app);
+      
       window.firebaseDB = db;
       window.firestoreCollection = collection;
       window.firestoreGetDocs = getDocs;
       window.firestoreAddDoc = addDoc;
+      window.firestoreUpdateDoc = updateDoc;
+      window.firestoreDeleteDoc = deleteDoc;
+      window.firestoreDoc = doc;
     </script>
 
     <script type="text/babel">
@@ -208,6 +83,11 @@
             const [entries, setEntries] = useState([]);
             const [loading, setLoading] = useState(true);
             const [showForm, setShowForm] = useState(false);
+            const [editingId, setEditingId] = useState(null);
+            
+            // Visualizer State
+            const [chartType, setChartType] = useState('pie');
+            const [chartFilter, setChartFilter] = useState('All');
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
 
@@ -232,7 +112,6 @@
                 'Other (Recommend medical/mobile/in-home groomer)'
             ];
 
-            // Firebase Loader
             useEffect(() => {
                 const checkFirebase = setInterval(() => {
                     if (window.firebaseDB) {
@@ -259,12 +138,17 @@
                 }
             };
 
-            // Chart Updater
+            // Chart Logic
             useEffect(() => {
                 if (loading || entries.length === 0) return;
 
+                // Filter data based on dropdown selection
+                const filteredEntries = chartFilter === 'All' 
+                    ? entries 
+                    : entries.filter(e => e.location === chartFilter);
+
                 const reasonCounts = {};
-                entries.forEach(entry => {
+                filteredEntries.forEach(entry => {
                     entry.reasons.forEach(reason => {
                         const label = reason.includes('Other') ? 'Other' : reason.split(' (')[0];
                         reasonCounts[label] = (reasonCounts[label] || 0) + 1;
@@ -278,10 +162,11 @@
                 const ctx = chartRef.current.getContext('2d');
                 
                 chartInstance.current = new Chart(ctx, {
-                    type: 'pie',
+                    type: chartType,
                     data: {
                         labels: Object.keys(reasonCounts),
                         datasets: [{
+                            label: 'Declined Appointments',
                             data: Object.values(reasonCounts),
                             backgroundColor: [
                                 '#00A0DC', '#FF6B35', '#0077B6', '#F4B41A', 
@@ -295,26 +180,50 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: { 
+                                display: chartType === 'pie', // Hide legend for bar chart
                                 position: 'right',
                                 labels: { font: { family: "'Poppins', sans-serif", size: 11 } }
                             }
-                        }
+                        },
+                        scales: chartType === 'bar' ? {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        } : {}
                     }
                 });
 
                 return () => {
-                    if (chartInstance.current) {
-                        chartInstance.current.destroy();
-                    }
+                    if (chartInstance.current) chartInstance.current.destroy();
                 };
-            }, [entries, loading]);
+            }, [entries, loading, chartType, chartFilter]);
 
             const handleCheckboxChange = (reason) => {
                 setSelectedReasons(prev => 
-                    prev.includes(reason) 
-                        ? prev.filter(r => r !== reason)
-                        : [...prev, reason]
+                    prev.includes(reason) ? prev.filter(r => r !== reason) : [...prev, reason]
                 );
+            };
+
+            const handleEdit = (entry) => {
+                setManagerName(entry.managerName);
+                setLocation(entry.location);
+                setPetAndParentName(entry.petAndParentName !== 'N/A' ? entry.petAndParentName : '');
+                setSelectedReasons(entry.reasons);
+                setCustomReason(entry.customReason || '');
+                setEditingId(entry.id);
+                setShowForm(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleDelete = async (id) => {
+                if(window.confirm('Are you sure you want to delete this entry?')) {
+                    try {
+                        const docRef = window.firestoreDoc(window.firebaseDB, 'declined_appointments', id);
+                        await window.firestoreDeleteDoc(docRef);
+                        await loadEntries();
+                    } catch (error) {
+                        console.error("Error deleting document: ", error);
+                        alert("Error deleting. Try again.");
+                    }
+                }
             };
 
             const handleSubmit = async (e) => {
@@ -326,7 +235,7 @@
 
                 localStorage.setItem('declineManagerName', managerName);
 
-                const newEntry = {
+                const entryData = {
                     managerName,
                     location,
                     petAndParentName: petAndParentName || 'N/A',
@@ -337,12 +246,21 @@
                 };
 
                 try {
-                    const entriesCol = window.firestoreCollection(window.firebaseDB, 'declined_appointments');
-                    await window.firestoreAddDoc(entriesCol, newEntry);
+                    if (editingId) {
+                        // Update existing entry
+                        const docRef = window.firestoreDoc(window.firebaseDB, 'declined_appointments', editingId);
+                        await window.firestoreUpdateDoc(docRef, entryData);
+                    } else {
+                        // Create new entry
+                        const entriesCol = window.firestoreCollection(window.firebaseDB, 'declined_appointments');
+                        await window.firestoreAddDoc(entriesCol, entryData);
+                    }
                     
+                    // Reset
                     setPetAndParentName('');
                     setSelectedReasons([]);
                     setCustomReason('');
+                    setEditingId(null);
                     setShowForm(false);
                     await loadEntries();
                 } catch (error) {
@@ -359,23 +277,21 @@
                     </div>
 
                     <div>
-                        <button className="btn" onClick={() => setShowForm(!showForm)}>
+                        <button className="btn" onClick={() => {
+                            setShowForm(!showForm);
+                            if(showForm) setEditingId(null); // Clear editing state if canceling
+                        }}>
                             {showForm ? 'Close Form' : '+ Log Declined Appointment'}
                         </button>
                     </div>
 
                     {showForm && (
                         <div className="form-box">
+                            <h3 style={{marginTop: 0, color: '#0077B6'}}>{editingId ? 'Edit Entry' : 'New Entry'}</h3>
                             <div className="form-grid">
                                 <div>
                                     <label className="form-label">Your Name</label>
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        value={managerName} 
-                                        onChange={(e) => setManagerName(e.target.value)} 
-                                        placeholder="e.g. Nate Graves"
-                                    />
+                                    <input type="text" className="form-input" value={managerName} onChange={(e) => setManagerName(e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="form-label">Scenter Location</label>
@@ -385,13 +301,7 @@
                                 </div>
                                 <div>
                                     <label className="form-label">Pet & Parent Name (Optional)</label>
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        value={petAndParentName} 
-                                        onChange={(e) => setPetAndParentName(e.target.value)} 
-                                        placeholder="e.g. Buster (John Smith)"
-                                    />
+                                    <input type="text" className="form-input" value={petAndParentName} onChange={(e) => setPetAndParentName(e.target.value)} />
                                 </div>
                             </div>
 
@@ -400,11 +310,7 @@
                                 <div className="checkbox-grid">
                                     {safetyReasons.map(reason => (
                                         <label key={reason} className="checkbox-label">
-                                            <input 
-                                                type="checkbox" 
-                                                checked={selectedReasons.includes(reason)}
-                                                onChange={() => handleCheckboxChange(reason)}
-                                            />
+                                            <input type="checkbox" checked={selectedReasons.includes(reason)} onChange={() => handleCheckboxChange(reason)} />
                                             {reason}
                                         </label>
                                     ))}
@@ -414,18 +320,12 @@
                             {selectedReasons.some(r => r.includes('Other')) && (
                                 <div style={{ marginTop: '20px' }}>
                                     <label className="form-label">Specify Other Reason / Additional Details</label>
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        value={customReason} 
-                                        onChange={(e) => setCustomReason(e.target.value)} 
-                                        placeholder="Please detail the reason..."
-                                    />
+                                    <input type="text" className="form-input" value={customReason} onChange={(e) => setCustomReason(e.target.value)} />
                                 </div>
                             )}
 
                             <div style={{ marginTop: '30px' }}>
-                                <button className="btn" onClick={handleSubmit}>Save Entry</button>
+                                <button className="btn" onClick={handleSubmit}>{editingId ? 'Update Entry' : 'Save Entry'}</button>
                             </div>
                         </div>
                     )}
@@ -437,14 +337,26 @@
                             {/* Chart Container */}
                             {entries.length > 0 && (
                                 <div className="chart-container">
-                                    <h3 style={{ margin: '0 0 15px 0', color: '#0077B6', fontSize: '1.1em', textAlign: 'center' }}>Decline Reasons Breakdown</h3>
-                                    <div style={{ height: '280px', width: '100%' }}>
+                                    <div className="chart-controls">
+                                        <h3 style={{ margin: '0', color: '#0077B6', fontSize: '1.1em' }}>Decline Reasons Visualization</h3>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <select className="form-select" style={{ padding: '5px', width: 'auto' }} value={chartFilter} onChange={(e) => setChartFilter(e.target.value)}>
+                                                <option value="All">All Locations</option>
+                                                {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                                            </select>
+                                            <select className="form-select" style={{ padding: '5px', width: 'auto' }} value={chartType} onChange={(e) => setChartType(e.target.value)}>
+                                                <option value="pie">Pie Chart</option>
+                                                <option value="bar">Bar Chart</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div style={{ flexGrow: 1, width: '100%', position: 'relative' }}>
                                         <canvas ref={chartRef}></canvas>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Data Table Container */}
+                            {/* Data Table */}
                             <div className="table-container">
                                 <div style={{ overflowX: 'auto' }}>
                                     <table className="data-table">
@@ -455,12 +367,13 @@
                                                 <th>Entered By</th>
                                                 <th>Pet & Parent</th>
                                                 <th>Reasons for Decline</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {entries.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>
+                                                    <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>
                                                         No declined appointments logged yet.
                                                     </td>
                                                 </tr>
@@ -475,6 +388,10 @@
                                                             {entry.reasons.map((r, i) => (
                                                                 <span key={i} className="tag">{r.includes('Other') ? `Other: ${entry.customReason}` : r}</span>
                                                             ))}
+                                                        </td>
+                                                        <td className="action-cell">
+                                                            <button className="btn btn-small" onClick={() => handleEdit(entry)}>Edit</button>
+                                                            <button className="btn btn-small btn-danger" onClick={() => handleDelete(entry.id)}>Delete</button>
                                                         </td>
                                                     </tr>
                                                 ))
