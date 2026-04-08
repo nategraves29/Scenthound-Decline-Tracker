@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Decline Tracker - Scenthound</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            max-width: 100%;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 { margin: 0; font-size: 2.2em; font-weight: 700; letter-spacing: 1px; }
+        .subtitle { font-size: 1.1em; opacity: 0.9; font-weight: 400; margin-top: 5px; }
+
+        .btn {
+            background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 160, 220, 0.3);
+        }
+
+        .form-box {
+            background: #f0f9ff;
+            border-left: 5px solid #00A0DC;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #0077B6;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #00A0DC;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .checkbox-label input { margin-top: 4px; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            height: 350px;
+            position: relative;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .data-table thead {
+            background: linear-gradient(135deg, #00A0DC 0%, #0077B6 100%);
+            color: white;
+        }
+
+        .data-table th, .data-table td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table tbody tr:hover { background: #f0f9ff; }
+
+        .tag {
+            display: inline-block;
+            background: #e6f7ff;
+            color: #0077B6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin: 2px;
+            font-weight: 600;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 350px 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      
+      // PASTE YOUR NEW CONFIG KEYS HERE
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
+      
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      
+      window.firebaseDB = db;
+      window.firestoreCollection = collection;
+      window.firestoreGetDocs = getDocs;
+      window.firestoreAddDoc = addDoc;
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const DeclineTracker = () => {
+            const [entries, setEntries] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [showForm, setShowForm] = useState(false);
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            // Form State
+            const [managerName, setManagerName] = useState(() => localStorage.getItem('declineManagerName') || '');
+            const [location, setLocation] = useState('Cedar Mill');
+            const [petAndParentName, setPetAndParentName] = useState('');
+            const [selectedReasons, setSelectedReasons] = useState([]);
+            const [customReason, setCustomReason] = useState('');
+
+            const locations = ['Cedar Mill', 'Tigard', 'Hillsboro', 'Sherwood'];
+            
+            // Note the updated policy phrasing for Skin Conditions
+            const safetyReasons = [
+                'Growths/Lumps/Tumors',
+                'Mobility (Requires constant support / breaks >15 min)',
+                'Senior',
+                'Skin Conditions (Active sores / Scabbed / Prone to opening)',
+                'Behavior/Stress',
+                'Neurological/Cognitive issues',
+                'Spinal issues',
+                'Arthritis/Old-Age diseases or co-morbidities',
+                'Other (Recommend medical/mobile/in-home groomer)'
+            ];
+
+            // Firebase Loader
+            useEffect(() => {
+                const checkFirebase = setInterval(() => {
+                    if (window.firebaseDB) {
+                        clearInterval(checkFirebase);
+                        loadEntries();
+                    }
+                }, 100);
+                return () => clearInterval(checkFirebase);
+            }, []);
+
+            const loadEntries = async () => {
+                try {
+                    const entriesCol = window.firestoreCollection(window.firebaseDB, 'declined_appointments');
+                    const snapshot = await window.firestoreGetDocs(entriesCol);
+                    const entriesData = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setEntries(entriesData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                } catch (error) {
+                    console.error('Error loading entries:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // Chart Updater
+            useEffect(() => {
+                if (loading || entries.length === 0) return;
+
+                const reasonCounts = {};
+                entries.forEach(entry => {
+                    entry.reasons.forEach(reason => {
+                        const label = reason.includes('Other') ? 'Other' : reason.split(' (')[0];
+                        reasonCounts[label] = (reasonCounts[label] || 0) + 1;
+                    });
+                });
+
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                const ctx = chartRef.current.getContext('2d');
+                
+                chartInstance.current = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(reasonCounts),
+                        datasets: [{
+                            data: Object.values(reasonCounts),
+                            backgroundColor: [
+                                '#00A0DC', '#FF6B35', '#0077B6', '#F4B41A', 
+                                '#E74C3C', '#8E44AD', '#2ECC71', '#34495E', '#95A5A6'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'right',
+                                labels: { font: { family: "'Poppins', sans-serif", size: 11 } }
+                            }
+                        }
+                    }
+                });
+
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [entries, loading]);
+
+            const handleCheckboxChange = (reason) => {
+                setSelectedReasons(prev => 
+                    prev.includes(reason) 
+                        ? prev.filter(r => r !== reason)
+                        : [...prev, reason]
+                );
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!managerName || selectedReasons.length === 0) {
+                    alert('Please enter your name and select at least one reason.');
+                    return;
+                }
+
+                localStorage.setItem('declineManagerName', managerName);
+
+                const newEntry = {
+                    managerName,
+                    location,
+                    petAndParentName: petAndParentName || 'N/A',
+                    reasons: selectedReasons,
+                    customReason: selectedReasons.includes('Other (Recommend medical/mobile/in-home groomer)') ? customReason : '',
+                    timestamp: new Date().toISOString(),
+                    dateDisplay: new Date().toLocaleDateString()
+                };
+
+                try {
+                    const entriesCol = window.firestoreCollection(window.firebaseDB, 'declined_appointments');
+                    await window.firestoreAddDoc(entriesCol, newEntry);
+                    
+                    setPetAndParentName('');
+                    setSelectedReasons([]);
+                    setCustomReason('');
+                    setShowForm(false);
+                    await loadEntries();
+                } catch (error) {
+                    console.error('Error saving entry:', error);
+                    alert('Error saving entry. Please try again.');
+                }
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1>Safety Decline Tracker</h1>
+                        <div className="subtitle">Track appointments declined strictly for safety reasons</div>
+                    </div>
+
+                    <div>
+                        <button className="btn" onClick={() => setShowForm(!showForm)}>
+                            {showForm ? 'Close Form' : '+ Log Declined Appointment'}
+                        </button>
+                    </div>
+
+                    {showForm && (
+                        <div className="form-box">
+                            <div className="form-grid">
+                                <div>
+                                    <label className="form-label">Your Name</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        value={managerName} 
+                                        onChange={(e) => setManagerName(e.target.value)} 
+                                        placeholder="e.g. Nate Graves"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Scenter Location</label>
+                                    <select className="form-select" value={location} onChange={(e) => setLocation(e.target.value)}>
+                                        {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="form-label">Pet & Parent Name (Optional)</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        value={petAndParentName} 
+                                        onChange={(e) => setPetAndParentName(e.target.value)} 
+                                        placeholder="e.g. Buster (John Smith)"
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: '20px' }}>
+                                <label className="form-label">Reasons for Decline (Select all that apply)</label>
+                                <div className="checkbox-grid">
+                                    {safetyReasons.map(reason => (
+                                        <label key={reason} className="checkbox-label">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedReasons.includes(reason)}
+                                                onChange={() => handleCheckboxChange(reason)}
+                                            />
+                                            {reason}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {selectedReasons.some(r => r.includes('Other')) && (
+                                <div style={{ marginTop: '20px' }}>
+                                    <label className="form-label">Specify Other Reason / Additional Details</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        value={customReason} 
+                                        onChange={(e) => setCustomReason(e.target.value)} 
+                                        placeholder="Please detail the reason..."
+                                    />
+                                </div>
+                            )}
+
+                            <div style={{ marginTop: '30px' }}>
+                                <button className="btn" onClick={handleSubmit}>Save Entry</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {loading ? (
+                        <div style={{ textAlign: 'center', padding: '40px' }}>Loading historical data...</div>
+                    ) : (
+                        <div className="dashboard-grid">
+                            {/* Chart Container */}
+                            {entries.length > 0 && (
+                                <div className="chart-container">
+                                    <h3 style={{ margin: '0 0 15px 0', color: '#0077B6', fontSize: '1.1em' }}>Decline Reasons Breakdown</h3>
+                                    <div style={{ height: '280px', width: '100%' }}>
+                                        <canvas ref={chartRef}></canvas>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Data Table Container */}
+                            <div style={{ overflowX: 'auto' }}>
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Location</th>
+                                            <th>Entered By</th>
+                                            <th>Pet & Parent</th>
+                                            <th>Reasons for Decline</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {entries.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>
+                                                    No declined appointments logged yet.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            entries.map(entry => (
+                                                <tr key={entry.id}>
+                                                    <td>{entry.dateDisplay}</td>
+                                                    <td><strong>{entry.location}</strong></td>
+                                                    <td>{entry.managerName}</td>
+                                                    <td>{entry.petAndParentName}</td>
+                                                    <td>
+                                                        {entry.reasons.map((r, i) => (
+                                                            <span key={i} className="tag">{r.includes('Other') ? `Other: ${entry.customReason}` : r}</span>
+                                                        ))}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<DeclineTracker />, document.getElementById('root'));
+    </script>
+</body>
+</html>
