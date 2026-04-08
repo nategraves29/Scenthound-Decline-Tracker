@@ -208,19 +208,26 @@
                 });
             };
 
-            // Chart Logic
+            // Chart Logic - UPDATED TO GROUP MULTIPLE REASONS
             useEffect(() => {
                 if (loading || entries.length === 0) return;
 
-                // Only apply Location and Date filters to the chart (not the search bar)
                 const chartData = getFilteredData(false);
 
                 const reasonCounts = {};
                 chartData.forEach(entry => {
-                    entry.reasons.forEach(reason => {
-                        const label = reason.includes('Other') ? 'Other' : reason.split(' (')[0];
-                        reasonCounts[label] = (reasonCounts[label] || 0) + 1;
+                    // Create an array of simplified labels for this entry
+                    let labels = entry.reasons.map(reason => {
+                        return reason.includes('Other') ? 'Other' : reason.split(' (')[0];
                     });
+                    
+                    // Sort them alphabetically so the order doesn't matter (e.g. Senior + Mobility is the same as Mobility + Senior)
+                    labels.sort();
+                    
+                    // Join them together into a single composite string
+                    const finalLabel = labels.join(' + ');
+                    
+                    reasonCounts[finalLabel] = (reasonCounts[finalLabel] || 0) + 1;
                 });
 
                 if (chartInstance.current) {
@@ -356,7 +363,6 @@
                 document.body.removeChild(link);
             };
 
-            // Data to render in table
             const currentTableData = getFilteredData(true);
 
             return (
@@ -369,7 +375,6 @@
                         <div className="subtitle">Track appointments declined strictly for safety reasons</div>
                     </div>
 
-                    {/* NEW SYNC REMINDER */}
                     <div className="sync-reminder">
                         🔄 <strong>Reminder:</strong> Please refresh this page daily to ensure your app stays fully synced with the cloud database.
                     </div>
@@ -429,7 +434,6 @@
                         <div style={{ textAlign: 'center', padding: '40px' }}>Loading historical data...</div>
                     ) : (
                         <div className="dashboard-layout">
-                            {/* Dashboard Controls & Chart */}
                             {entries.length > 0 && (
                                 <div className="chart-container">
                                     <div className="chart-controls">
@@ -461,7 +465,6 @@
                                 </div>
                             )}
 
-                            {/* Data Table Area */}
                             <div className="table-container">
                                 <div className="table-header-bar">
                                     <h3 style={{ margin: '0', color: '#0077B6', fontSize: '1.1em' }}>Log History</h3>
