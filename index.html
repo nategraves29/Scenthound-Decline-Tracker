@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="3600">
     <title>Safety Decline Tracker - Scenthound</title>
+    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -114,6 +116,7 @@
             // Dashboard Filter State
             const [chartType, setChartType] = useState('pie');
             const [chartFilter, setChartFilter] = useState('All');
+            const [managerFilter, setManagerFilter] = useState('All');
             const [startDate, setStartDate] = useState('');
             const [endDate, setEndDate] = useState('');
             const [searchTerm, setSearchTerm] = useState('');
@@ -127,8 +130,10 @@
             const [petAndParentName, setPetAndParentName] = useState('');
             const [selectedReasons, setSelectedReasons] = useState([]);
             const [customReason, setCustomReason] = useState('');
+            const [notificationMethod, setNotificationMethod] = useState('Spoke on Phone');
 
             const locations = ['Cedar Mill', 'Tigard', 'Hillsboro', 'Sherwood'];
+            const contactMethods = ['Spoke on Phone', 'Left Voicemail', 'Text Sent', 'Email Sent', 'Not Contacted'];
             
             const safetyReasons = [
                 'Growths/Lumps/Tumors',
@@ -180,20 +185,17 @@
                 }
             };
 
-            // Master Filtering Logic
             const getFilteredData = (applySearch = false) => {
                 return entries.filter(entry => {
-                    // 1. Location Filter
                     if (chartFilter !== 'All' && entry.location !== chartFilter) return false;
+                    if (managerFilter !== 'All' && entry.managerName !== managerFilter) return false;
                     
-                    // 2. Date Range Filter
                     if (startDate || endDate) {
                         const entryDate = new Date(entry.timestamp);
                         if (startDate && entryDate < new Date(startDate + 'T00:00:00')) return false;
                         if (endDate && entryDate > new Date(endDate + 'T23:59:59')) return false;
                     }
 
-                    // 3. Search Bar Filter (Only applies to Table and CSV Export)
                     if (applySearch && searchTerm) {
                         const term = searchTerm.toLowerCase();
                         const matchDog = entry.petAndParentName.toLowerCase().includes(term);
@@ -208,7 +210,8 @@
                 });
             };
 
-            // Chart Logic - UPDATED TO GROUP MULTIPLE REASONS
+            const uniqueManagers = [...new Set(entries.map(e => e.managerName))].filter(Boolean).sort();
+
             useEffect(() => {
                 if (loading || entries.length === 0) return;
 
@@ -216,15 +219,11 @@
 
                 const reasonCounts = {};
                 chartData.forEach(entry => {
-                    // Create an array of simplified labels for this entry
                     let labels = entry.reasons.map(reason => {
                         return reason.includes('Other') ? 'Other' : reason.split(' (')[0];
                     });
                     
-                    // Sort them alphabetically so the order doesn't matter (e.g. Senior + Mobility is the same as Mobility + Senior)
                     labels.sort();
-                    
-                    // Join them together into a single composite string
                     const finalLabel = labels.join(' + ');
                     
                     reasonCounts[finalLabel] = (reasonCounts[finalLabel] || 0) + 1;
@@ -273,7 +272,7 @@
                 return () => {
                     if (chartInstance.current) chartInstance.current.destroy();
                 };
-            }, [entries, loading, chartType, chartFilter, startDate, endDate, isDarkMode]);
+            }, [entries, loading, chartType, chartFilter, managerFilter, startDate, endDate, isDarkMode]);
 
             const handleCheckboxChange = (reason) => {
                 setSelectedReasons(prev => prev.includes(reason) ? prev.filter(r => r !== reason) : [...prev, reason]);
@@ -285,6 +284,7 @@
                 setPetAndParentName(entry.petAndParentName !== 'N/A' ? entry.petAndParentName : '');
                 setSelectedReasons(entry.reasons);
                 setCustomReason(entry.customReason || '');
+                setNotificationMethod(entry.notificationMethod || 'Spoke on Phone');
                 setEditingId(entry.id);
                 setShowForm(true);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -315,6 +315,7 @@
                     petAndParentName: petAndParentName || 'N/A',
                     reasons: selectedReasons,
                     customReason: selectedReasons.includes('Other (Recommend medical/mobile/in-home groomer)') ? customReason : '',
+                    notificationMethod,
                     timestamp: new Date().toISOString(),
                     dateDisplay: new Date().toLocaleDateString()
                 };
@@ -327,7 +328,7 @@
                         const entriesCol = window.firestoreCollection(window.firebaseDB, 'declined_appointments');
                         await window.firestoreAddDoc(entriesCol, entryData);
                     }
-                    setPetAndParentName(''); setSelectedReasons([]); setCustomReason(''); setEditingId(null); setShowForm(false);
+                    setPetAndParentName(''); setSelectedReasons([]); setCustomReason(''); setNotificationMethod('Spoke on Phone'); setEditingId(null); setShowForm(false);
                     await loadEntries();
                 } catch (error) { console.error('Error saving:', error); alert('Error saving entry.'); }
             };
@@ -339,7 +340,7 @@
                     return;
                 }
 
-                const headers = ['Date', 'Location', 'Entered By', 'Pet & Parent', 'Reasons', 'Custom Details'];
+                const headers = ['Date', 'Location', 'Entered By', 'Pet & Parent', 'Reasons', 'Custom Details', 'Notification Method'];
                 
                 const rows = tableData.map(e => [
                     e.dateDisplay,
@@ -347,7 +348,8 @@
                     e.managerName,
                     `"${e.petAndParentName}"`,
                     `"${e.reasons.join(', ')}"`, 
-                    `"${e.customReason || ''}"`
+                    `"${e.customReason || ''}"`,
+                    `"${e.notificationMethod || 'N/A'}"`
                 ]);
 
                 const csvContent = "data:text/csv;charset=utf-8," 
@@ -376,7 +378,7 @@
                     </div>
 
                     <div className="sync-reminder">
-                        🔄 <strong>Reminder:</strong> Please refresh this page daily to ensure your app stays fully synced with the cloud database.
+                        🔄 <strong>App automatically refreshes every hour to maintain cloud synchronization.</strong>
                     </div>
 
                     <div>
@@ -424,6 +426,13 @@
                                 </div>
                             )}
 
+                            <div style={{ marginTop: '20px' }}>
+                                <label className="form-label">How was the Pet Parent notified?</label>
+                                <select className="form-select" style={{ maxWidth: '300px' }} value={notificationMethod} onChange={(e) => setNotificationMethod(e.target.value)}>
+                                    {contactMethods.map(method => <option key={method} value={method}>{method}</option>)}
+                                </select>
+                            </div>
+
                             <div style={{ marginTop: '30px' }}>
                                 <button className="btn" onClick={handleSubmit}>{editingId ? 'Update Entry' : 'Save Entry'}</button>
                             </div>
@@ -443,6 +452,11 @@
                                                 <select className="form-select" style={{ padding: '6px', width: 'auto' }} value={chartFilter} onChange={(e) => setChartFilter(e.target.value)}>
                                                     <option value="All">All Locations</option>
                                                     {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                                                </select>
+                                                
+                                                <select className="form-select" style={{ padding: '6px', width: 'auto' }} value={managerFilter} onChange={(e) => setManagerFilter(e.target.value)}>
+                                                    <option value="All">All Managers</option>
+                                                    {uniqueManagers.map(mgr => <option key={mgr} value={mgr}>{mgr}</option>)}
                                                 </select>
                                                 
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -489,6 +503,7 @@
                                                 <th>Location</th>
                                                 <th>Entered By</th>
                                                 <th>Pet & Parent</th>
+                                                <th>Notification</th>
                                                 <th>Reasons for Decline</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -496,7 +511,7 @@
                                         <tbody>
                                             {currentTableData.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>
+                                                    <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>
                                                         No declined appointments match your current filters or search.
                                                     </td>
                                                 </tr>
@@ -507,6 +522,7 @@
                                                         <td><strong>{entry.location}</strong></td>
                                                         <td>{entry.managerName}</td>
                                                         <td>{entry.petAndParentName}</td>
+                                                        <td><span className="tag" style={{background: 'transparent', border: '1px solid #00A0DC'}}>{entry.notificationMethod || 'N/A'}</span></td>
                                                         <td>
                                                             {entry.reasons.map((r, i) => (
                                                                 <span key={i} className="tag">{r.includes('Other') ? `Other: ${entry.customReason}` : r}</span>
