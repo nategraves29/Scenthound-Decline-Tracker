@@ -66,7 +66,7 @@
         /* Summary Stats Bar */
         .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 20px; width: 100%; }
         .stat-card { background: white; border: 1px solid #eee; border-radius: 8px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s; width: 100%; }
-        .stat-value { font-size: 1.8em; font-weight: 700; color: #00A0DC; line-height: 1.1; word-wrap: break-word; }
+        .stat-value { font-size: 1.8em; font-weight: 700; color: #00A0DC; line-height: 1.2; overflow-wrap: break-word; }
         .stat-value.small { font-size: 1.05em; }
         .stat-label { font-size: 0.78em; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
@@ -94,10 +94,9 @@
             color: #333; 
             transition: 0.3s; 
             box-sizing: border-box;
-            min-width: 0; /* Prevents flex items from overflowing container bounds */
+            min-width: 0; 
         }
         
-        /* Specific fix for iOS Date Pickers forcing page widths */
         input[type="date"] {
             -webkit-appearance: none;
             appearance: none;
@@ -643,7 +642,8 @@
                             </div>
                             <div className="stat-card">
                                 <div className={`stat-value ${topReason && topReason[0].length > 14 ? 'small' : ''}`}>
-                                    {topReason ? topReason[0].split(' (')[0] : '—'}
+                                    {/* FIX: Replaces slashes with slash + zero-width-space for clean wrapping */}
+                                    {topReason ? topReason[0].split(' (')[0].replace(/\//g, '/\u200B') : '—'}
                                 </div>
                                 <div className="stat-label">Top Reason</div>
                             </div>
@@ -752,7 +752,8 @@
                                                     <div className="location-card-total">{locEntries.length} <span>total</span></div>
                                                     <div className="location-card-month">{locThisMonth.length} this month</div>
                                                     <div className="location-card-reason">
-                                                        {locTop ? `Top: ${locTop[0]}` : <span style={{color:'#aaa'}}>No entries yet</span>}
+                                                        {/* FIX: Replaces slashes with slash + zero-width-space for clean wrapping */}
+                                                        {locTop ? `Top: ${locTop[0].replace(/\//g, '/\u200B')}` : <span style={{color:'#aaa'}}>No entries yet</span>}
                                                     </div>
                                                 </div>
                                             );
