@@ -716,7 +716,7 @@
                                                     {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
                                                 </select>
                                                 <select className="form-select" style={{ padding: '6px', width: 'auto' }} value={managerFilter} onChange={(e) => setManagerFilter(e.target.value)}>
-                                                    <option value="All">All Managers</option>
+                                                    <option value="All">All Team Members</option>
                                                     {uniqueManagers.map(mgr => <option key={mgr} value={mgr}>{mgr}</option>)}
                                                 </select>
                                                 <div className="date-range-row" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -747,7 +747,7 @@
                                         <input
                                             type="text"
                                             className="form-input search-input-mobile"
-                                            placeholder="Search Dog, Manager, Reason, Notes..."
+                                            placeholder="Search Dog, Name, Reason, Notes..."
                                             style={{ padding: '6px 12px', width: '260px' }}
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
