@@ -835,7 +835,15 @@
                                                         <td>{entry.dateDisplay}</td>
                                                         <td><strong>{entry.location}</strong></td>
                                                         <td>{entry.managerName}</td>
-                                                        <td>{entry.petAndParentName}</td>
+                                                        <td>
+                                                            <div><strong>{entry.dogName || entry.petAndParentName.split(' & ')[0]}</strong></div>
+                                                            <div style={{fontSize: '0.85em', color: '#666'}}>{entry.parentName || ''}</div>
+                                                            {entry.myTimeLink && (
+                                                                <a href={entry.myTimeLink} target="_blank" rel="noreferrer" style={{display: 'inline-block', marginTop: '4px', fontSize: '0.8em', color: '#00A0DC', textDecoration: 'none', background: '#e0f4ff', padding: '2px 6px', borderRadius: '4px'}}>
+                                                                    🔗 MyTime Profile
+                                                                </a>
+                                                            )}
+                                                        </td>
                                                         <td><span className="tag" style={{background:'transparent', border:'1px solid #00A0DC'}}>{entry.notificationMethod || 'N/A'}</span></td>
                                                         <td>
                                                             {entry.reasons.map((r, i) => (
