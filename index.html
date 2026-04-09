@@ -280,7 +280,7 @@
             const [managerName, setManagerName] = useState(() => localStorage.getItem('declineManagerName') || '');
             const [location, setLocation] = useState('Cedar Mill');
             
-            // UPDATED: Separated name fields and MyTime Link for the manual form
+            // Separated name fields and MyTime Link for the manual form
             const [dogName, setDogName] = useState('');
             const [parentName, setParentName] = useState('');
             const [myTimeLink, setMyTimeLink] = useState('');
@@ -775,7 +775,7 @@
                                             locEntries.forEach(e => e.reasons.forEach(r => {
                                                 const label = r.includes('Other') ? 'Other' : r.split(' (')[0];
                                                 locReasonCounts[label] = (locReasonCounts[label] || 0) + 1;
-                                            });
+                                            })); // <--- THIS WAS THE MISSING PARENTHESIS!
                                             const locTop = Object.entries(locReasonCounts).sort((a,b) => b[1]-a[1])[0];
                                             return (
                                                 <div key={loc} className="location-card">
