@@ -1,1 +1,13 @@
-
+{
+  "manifest_version": 3,
+  "name": "Scenthound Decline Logger",
+  "version": "1.0",
+  "description": "Scrapes MyTime data and logs safety declines.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ]
+}
