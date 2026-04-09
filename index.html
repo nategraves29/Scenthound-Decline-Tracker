@@ -279,7 +279,12 @@
 
             const [managerName, setManagerName] = useState(() => localStorage.getItem('declineManagerName') || '');
             const [location, setLocation] = useState('Cedar Mill');
-            const [petAndParentName, setPetAndParentName] = useState('');
+            
+            // UPDATED: Separated name fields and MyTime Link for the manual form
+            const [dogName, setDogName] = useState('');
+            const [parentName, setParentName] = useState('');
+            const [myTimeLink, setMyTimeLink] = useState('');
+            
             const [selectedReasons, setSelectedReasons] = useState([]);
             const [customReason, setCustomReason] = useState('');
             const [notificationMethod, setNotificationMethod] = useState('Spoke on Phone');
@@ -346,12 +351,15 @@
                     }
                     if (applySearch && searchTerm) {
                         const term = searchTerm.toLowerCase();
-                        const matchDog     = entry.petAndParentName.toLowerCase().includes(term);
+                        // Search the separated names or the combined fallback
+                        const matchDogName = (entry.dogName || '').toLowerCase().includes(term);
+                        const matchParentName = (entry.parentName || '').toLowerCase().includes(term);
+                        const matchCombined  = (entry.petAndParentName || '').toLowerCase().includes(term);
                         const matchManager = entry.managerName.toLowerCase().includes(term);
                         const matchCustom  = (entry.customReason || '').toLowerCase().includes(term);
                         const matchReason  = entry.reasons.some(r => r.toLowerCase().includes(term));
                         const matchNotes   = (entry.notes || '').toLowerCase().includes(term);
-                        if (!matchDog && !matchManager && !matchCustom && !matchReason && !matchNotes) return false;
+                        if (!matchDogName && !matchParentName && !matchCombined && !matchManager && !matchCustom && !matchReason && !matchNotes) return false;
                     }
                     return true;
                 });
@@ -407,7 +415,9 @@
             const handleEdit = (entry) => {
                 setManagerName(entry.managerName);
                 setLocation(entry.location);
-                setPetAndParentName(entry.petAndParentName !== 'N/A' ? entry.petAndParentName : '');
+                setDogName(entry.dogName || '');
+                setParentName(entry.parentName || '');
+                setMyTimeLink(entry.myTimeLink || '');
                 setSelectedReasons(entry.reasons);
                 setCustomReason(entry.customReason || '');
                 setNotificationMethod(entry.notificationMethod || 'Spoke on Phone');
@@ -434,10 +444,20 @@
                     return;
                 }
                 localStorage.setItem('declineManagerName', managerName);
+                
+                // Keep backward compatibility for combined name
+                let combinedName = "N/A";
+                if (dogName && parentName) combinedName = `${dogName} & ${parentName}`;
+                else if (dogName) combinedName = dogName;
+                else if (parentName) combinedName = parentName;
+
                 const entryData = {
                     managerName,
                     location,
-                    petAndParentName: petAndParentName || 'N/A',
+                    dogName,
+                    parentName,
+                    petAndParentName: combinedName,
+                    myTimeLink,
                     reasons: selectedReasons,
                     customReason: selectedReasons.includes('Other (Recommend medical/mobile/in-home groomer)') ? customReason : '',
                     notificationMethod,
@@ -453,7 +473,7 @@
                         const entriesCol = window.firestoreCollection(window.firebaseDB, 'declined_appointments');
                         await window.firestoreAddDoc(entriesCol, entryData);
                     }
-                    setPetAndParentName(''); setSelectedReasons([]); setCustomReason('');
+                    setDogName(''); setParentName(''); setMyTimeLink(''); setSelectedReasons([]); setCustomReason('');
                     setNotificationMethod('Spoke on Phone'); setNotesField('');
                     setEditingId(null); setShowForm(false);
                     await loadEntries();
@@ -466,7 +486,7 @@
                 const headers = ['Date','Location','Entered By','Pet & Parent','Reasons','Custom Details','Notification Method','Notes'];
                 const rows = tableData.map(e => [
                     e.dateDisplay, e.location, e.managerName,
-                    `"${e.petAndParentName}"`,
+                    `"${e.petAndParentName || ''}"`,
                     `"${e.reasons.join(', ')}"`,
                     `"${e.customReason || ''}"`,
                     `"${e.notificationMethod || 'N/A'}"`,
@@ -642,7 +662,6 @@
                             </div>
                             <div className="stat-card">
                                 <div className={`stat-value ${topReason && topReason[0].length > 14 ? 'small' : ''}`}>
-                                    {/* FIX: Replaces slashes with slash + zero-width-space for clean wrapping */}
                                     {topReason ? topReason[0].split(' (')[0].replace(/\//g, '/\u200B') : '—'}
                                 </div>
                                 <div className="stat-label">Top Reason</div>
@@ -677,10 +696,22 @@
                                         {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
                                     </select>
                                 </div>
+                            </div>
+                            
+                            <div className="form-grid" style={{ marginTop: '0' }}>
                                 <div>
-                                    <label className="form-label">Pet & Parent Name (Optional)</label>
-                                    <input type="text" className="form-input" value={petAndParentName} onChange={(e) => setPetAndParentName(e.target.value)} />
+                                    <label className="form-label">Dog Name (Optional)</label>
+                                    <input type="text" className="form-input" value={dogName} onChange={(e) => setDogName(e.target.value)} />
                                 </div>
+                                <div>
+                                    <label className="form-label">Pet Parent Name (Optional)</label>
+                                    <input type="text" className="form-input" value={parentName} onChange={(e) => setParentName(e.target.value)} />
+                                </div>
+                            </div>
+                            
+                            <div style={{ marginTop: '10px' }}>
+                                <label className="form-label">MyTime Profile Link (Optional)</label>
+                                <input type="text" className="form-input" placeholder="Paste full URL here..." value={myTimeLink} onChange={(e) => setMyTimeLink(e.target.value)} />
                             </div>
 
                             <div style={{ marginTop: '20px' }}>
@@ -744,7 +775,7 @@
                                             locEntries.forEach(e => e.reasons.forEach(r => {
                                                 const label = r.includes('Other') ? 'Other' : r.split(' (')[0];
                                                 locReasonCounts[label] = (locReasonCounts[label] || 0) + 1;
-                                            }));
+                                            });
                                             const locTop = Object.entries(locReasonCounts).sort((a,b) => b[1]-a[1])[0];
                                             return (
                                                 <div key={loc} className="location-card">
@@ -752,7 +783,6 @@
                                                     <div className="location-card-total">{locEntries.length} <span>total</span></div>
                                                     <div className="location-card-month">{locThisMonth.length} this month</div>
                                                     <div className="location-card-reason">
-                                                        {/* FIX: Replaces slashes with slash + zero-width-space for clean wrapping */}
                                                         {locTop ? `Top: ${locTop[0].replace(/\//g, '/\u200B')}` : <span style={{color:'#aaa'}}>No entries yet</span>}
                                                     </div>
                                                 </div>
@@ -836,7 +866,7 @@
                                                         <td><strong>{entry.location}</strong></td>
                                                         <td>{entry.managerName}</td>
                                                         <td>
-                                                            <div><strong>{entry.dogName || entry.petAndParentName.split(' & ')[0]}</strong></div>
+                                                            <div><strong>{entry.dogName || (entry.petAndParentName && entry.petAndParentName.split(' & ')[0]) || 'N/A'}</strong></div>
                                                             <div style={{fontSize: '0.85em', color: '#666'}}>{entry.parentName || ''}</div>
                                                             {entry.myTimeLink && (
                                                                 <a href={entry.myTimeLink} target="_blank" rel="noreferrer" style={{display: 'inline-block', marginTop: '4px', fontSize: '0.8em', color: '#00A0DC', textDecoration: 'none', background: '#e0f4ff', padding: '2px 6px', borderRadius: '4px'}}>
