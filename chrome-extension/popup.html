@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; width: 350px; padding: 15px; background: #f8f8f8; color: #333; margin: 0; }
+        h3 { margin-top: 0; color: #0077B6; text-align: center; border-bottom: 2px solid #00A0DC; padding-bottom: 10px; }
+        label { font-size: 0.85em; font-weight: bold; color: #0077B6; display: block; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        .checkbox-group { margin-top: 5px; max-height: 120px; overflow-y: auto; background: white; border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
+        .checkbox-group label { font-weight: normal; color: #333; display: flex; align-items: flex-start; margin-top: 2px; font-size: 0.8em; }
+        .checkbox-group input { width: auto; margin-right: 8px; margin-top: 3px; }
+        button { width: 100%; background: #00A0DC; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 4px; margin-top: 15px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #0077B6; }
+        #status { text-align: center; font-size: 0.85em; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h3>Log Safety Decline</h3>
+    
+    <label>Your Name</label>
+    <input type="text" id="managerName" placeholder="e.g., Sarah">
+    
+    <label>Location</label>
+    <select id="location">
+        <option>Cedar Mill</option>
+        <option>Tigard</option>
+        <option>Hillsboro</option>
+        <option>Sherwood</option>
+    </select>
+
+    <label>Pet & Parent</label>
+    <input type="text" id="petAndParentName" placeholder="Auto-filling...">
+
+    <label>MyTime Link</label>
+    <input type="text" id="myTimeLink" readonly style="background:#eee; color:#666; font-size:0.75em;">
+
+    <label>Reason(s) for Decline</label>
+    <div class="checkbox-group" id="reasonsBox">
+        <label><input type="checkbox" value="Growths/Lumps/Tumors"> Growths/Lumps/Tumors</label>
+        <label><input type="checkbox" value="Mobility (Requires constant support / breaks >15 min)"> Mobility</label>
+        <label><input type="checkbox" value="Senior"> Senior</label>
+        <label><input type="checkbox" value="Skin Conditions (Active sores / Scabbed / Prone to opening)"> Skin Conditions</label>
+        <label><input type="checkbox" value="Behavior/Stress"> Behavior/Stress</label>
+        <label><input type="checkbox" value="Neurological/Cognitive issues"> Neurological/Cognitive</label>
+        <label><input type="checkbox" value="Spinal issues"> Spinal issues</label>
+        <label><input type="checkbox" value="Arthritis/Old-Age diseases or co-morbidities"> Arthritis/Old-Age</label>
+        <label><input type="checkbox" value="Other (Recommend medical/mobile/in-home groomer)"> Other</label>
+    </div>
+
+    <label id="customReasonLabel" style="display:none;">Specify Other Reason</label>
+    <input type="text" id="customReason" style="display:none;">
+
+    <label>Notification Method</label>
+    <select id="notificationMethod">
+        <option>Spoke on Phone</option>
+        <option>Left Voicemail</option>
+        <option>Text Sent</option>
+        <option>Email Sent</option>
+        <option>Not Contacted</option>
+    </select>
+
+    <label>Notes</label>
+    <textarea id="notesField" rows="2" placeholder="Brief context..."></textarea>
+
+    <button id="submitBtn">Save Entry</button>
+    <div id="status"></div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
