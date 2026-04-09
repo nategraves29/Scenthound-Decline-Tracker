@@ -6,9 +6,14 @@
         h3 { margin-top: 0; color: #0077B6; text-align: center; border-bottom: 2px solid #00A0DC; padding-bottom: 10px; }
         label { font-size: 0.85em; font-weight: bold; color: #0077B6; display: block; margin-top: 10px; }
         input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        
+        /* Side-by-side inputs for names */
+        .name-grid { display: flex; gap: 10px; }
+        .name-grid > div { flex: 1; }
+
         .checkbox-group { margin-top: 5px; max-height: 120px; overflow-y: auto; background: white; border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
         .checkbox-group label { font-weight: normal; color: #333; display: flex; align-items: flex-start; margin-top: 2px; font-size: 0.8em; }
-        .checkbox-group input { width: auto; margin-right: 8px; margin-top: 3px; }
+        .checkbox-group input { width: auto; margin-right: 8px; margin-top: 3px; flex-shrink: 0; }
         button { width: 100%; background: #00A0DC; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 4px; margin-top: 15px; cursor: pointer; transition: 0.2s; }
         button:hover { background: #0077B6; }
         #status { text-align: center; font-size: 0.85em; margin-top: 10px; font-weight: bold; }
@@ -22,14 +27,22 @@
     
     <label>Location</label>
     <select id="location">
-        <option>Cedar Mill</option>
-        <option>Tigard</option>
-        <option>Hillsboro</option>
-        <option>Sherwood</option>
+        <option value="Cedar Mill">Cedar Mill</option>
+        <option value="Tigard">Tigard</option>
+        <option value="Hillsboro">Hillsboro</option>
+        <option value="Sherwood">Sherwood</option>
     </select>
 
-    <label>Pet & Parent</label>
-    <input type="text" id="petAndParentName" placeholder="Auto-filling...">
+    <div class="name-grid">
+        <div>
+            <label>Dog Name</label>
+            <input type="text" id="dogName" placeholder="Auto-filling...">
+        </div>
+        <div>
+            <label>Pet Parent</label>
+            <input type="text" id="parentName" placeholder="Auto-filling...">
+        </div>
+    </div>
 
     <label>MyTime Link</label>
     <input type="text" id="myTimeLink" readonly style="background:#eee; color:#666; font-size:0.75em;">
@@ -52,11 +65,11 @@
 
     <label>Notification Method</label>
     <select id="notificationMethod">
-        <option>Spoke in Person</option>
         <option>Spoke on Phone</option>
         <option>Left Voicemail</option>
         <option>Text Sent</option>
         <option>Email Sent</option>
+        <option>Not Contacted</option>
     </select>
 
     <label>Notes</label>
