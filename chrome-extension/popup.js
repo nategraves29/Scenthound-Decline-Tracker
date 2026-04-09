@@ -1,7 +1,7 @@
-// 1. Restore the last manager's name so they don't have to type it every time
+// Restore the last manager's name so they don't have to type it every time
 document.getElementById('managerName').value = localStorage.getItem('extManagerName') || '';
 
-// 2. Show/Hide "Other" text box
+// Show/Hide "Other" text box
 document.getElementById('reasonsBox').addEventListener('change', (e) => {
     const isOtherChecked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
                                 .some(cb => cb.value.includes('Other'));
@@ -9,7 +9,7 @@ document.getElementById('reasonsBox').addEventListener('change', (e) => {
     document.getElementById('customReason').style.display = isOtherChecked ? 'block' : 'none';
 });
 
-// 3. Scrape MyTime automatically when the popup opens
+// Scrape MyTime automatically when popup opens
 chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     let currentTab = tabs[0];
     document.getElementById('myTimeLink').value = currentTab.url;
@@ -19,14 +19,26 @@ chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         function: scrapeMyTimeData,
     }, (results) => {
         if (results && results[0] && results[0].result) {
-            document.getElementById('petAndParentName').value = results[0].result;
-        } else {
-            document.getElementById('petAndParentName').value = "Not on a MyTime profile";
+            let data = results[0].result;
+            
+            // Fill the separated names
+            document.getElementById('dogName').value = data.dog;
+            document.getElementById('parentName').value = data.parent;
+
+            // Auto-select the location from the dropdown
+            if (data.locationText) {
+                const locSelect = document.getElementById('location');
+                Array.from(locSelect.options).forEach(opt => {
+                    if (data.locationText.toLowerCase().includes(opt.value.toLowerCase())) {
+                        locSelect.value = opt.value;
+                    }
+                });
+            }
         }
     });
 });
 
-// This specific function gets injected into the webpage you are looking at
+// This function gets injected into the MyTime webpage
 function scrapeMyTimeData() {
     let parentEl = document.querySelector('h1.client-show__name');
     let parentName = parentEl ? parentEl.textContent.replace('', '').trim() : '';
@@ -34,17 +46,30 @@ function scrapeMyTimeData() {
     let dogEl = document.querySelector('span.qa-auto-child-label');
     let dogName = dogEl ? dogEl.textContent.replace('', '').replace('', '').trim() : '';
 
-    if (dogName && parentName) return `${dogName} & ${parentName}`;
-    if (dogName) return dogName;
-    if (parentName) return parentName;
-    return '';
+    // Look through all icon blocks to find the specific one holding the location
+    let locationText = '';
+    let iconBlocks = document.querySelectorAll('.icon-prefixed-block__text');
+    for (let block of iconBlocks) {
+        let text = block.textContent.trim();
+        if (text.includes('Cedar Mill') || text.includes('Tigard') || text.includes('Hillsboro') || text.includes('Sherwood')) {
+            locationText = text;
+            break; // We found the location, stop looking
+        }
+    }
+
+    return {
+        dog: dogName,
+        parent: parentName,
+        locationText: locationText
+    };
 }
 
-// 4. Send Data to Firebase
+// Send Data to Firebase
 document.getElementById('submitBtn').addEventListener('click', async () => {
     const managerName = document.getElementById('managerName').value;
     const location = document.getElementById('location').value;
-    const petAndParentName = document.getElementById('petAndParentName').value;
+    const dogName = document.getElementById('dogName').value;
+    const parentName = document.getElementById('parentName').value;
     const myTimeLink = document.getElementById('myTimeLink').value;
     const customReason = document.getElementById('customReason').value;
     const notificationMethod = document.getElementById('notificationMethod').value;
@@ -57,18 +82,26 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
         return;
     }
 
-    localStorage.setItem('extManagerName', managerName); // Save name for next time
+    // Combine them to prevent breaking your web app's existing layout
+    let combinedName = "N/A";
+    if (dogName && parentName) combinedName = `${dogName} & ${parentName}`;
+    else if (dogName) combinedName = dogName;
+    else if (parentName) combinedName = parentName;
+
+    localStorage.setItem('extManagerName', managerName);
     document.getElementById('submitBtn').innerText = "Saving...";
     document.getElementById('submitBtn').disabled = true;
 
-    // Direct REST API call to your exact Firestore database
+    // Direct REST API call to Firestore
     const firestoreEndpoint = "https://firestore.googleapis.com/v1/projects/scenthound-decline-tracker/databases/(default)/documents/declined_appointments";
     
     const payload = {
         fields: {
             managerName: { stringValue: managerName },
             location: { stringValue: location },
-            petAndParentName: { stringValue: petAndParentName },
+            dogName: { stringValue: dogName },
+            parentName: { stringValue: parentName },
+            petAndParentName: { stringValue: combinedName }, // Still sending this for the old table
             myTimeLink: { stringValue: myTimeLink },
             reasons: { arrayValue: { values: selectedReasons.map(r => ({ stringValue: r })) } },
             customReason: { stringValue: customReason },
